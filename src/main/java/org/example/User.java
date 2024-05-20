@@ -6,13 +6,13 @@ public class User {
     private int id;
     private String name;
     private String lastname;
-    private String subscriptionExpiryDate;
 
-    public User(int id, String name, String lastname, String subscriptionExpiryDate) {
+
+    public User(int id, String name, String lastname) {
         this.id = id;
         this.name = name;
         this.lastname = lastname;
-        this.subscriptionExpiryDate = subscriptionExpiryDate;
+
     }
 
     public int getId() {
@@ -39,11 +39,5 @@ public class User {
         this.lastname = lastname;
     }
 
-    public String getSubscriptionExpiryDate() {
-        return subscriptionExpiryDate;
-    }
 
-    public void setSubscriptionExpiryDate(String subscriptionExpiryDate) {
-        this.subscriptionExpiryDate = subscriptionExpiryDate;
-    }
 }

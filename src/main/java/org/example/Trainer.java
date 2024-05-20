@@ -4,8 +4,8 @@ public class Trainer extends User {
 
     private int groupNumber;
 
-    public Trainer(int id, String name, String lastname, String subscriptionExpiryDate, int groupNumber) {
-        super(id, name, lastname, subscriptionExpiryDate);
+    public Trainer(int id, String name, String lastname, int groupNumber) {
+        super(id, name, lastname);
         this.groupNumber = groupNumber;
     }
     public int getGroupNumber() {

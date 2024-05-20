@@ -2,7 +2,10 @@ package org.example;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CRUDUtils {
     public static void saveVisitorData(String name, String lastname, String subscriptionExpiryDate, boolean isSubscriptionActive, int groupNumber) {
@@ -32,5 +35,31 @@ public class CRUDUtils {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
+    }
+
+    public static List<Trainer> getTrainerList() {
+        List<Trainer> trainers = new ArrayList<>();
+        String query = "SELECT member_id, name, last_name,group_number FROM gymmembers";
+
+
+        try (Connection connection = DBUtils.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String name = resultSet.getString("name");
+                String lastname = resultSet.getString("lastname");
+                int groupNumber = resultSet.getInt("groupNumber");
+
+                Trainer trainer = new Trainer(id, name, lastname,groupNumber);
+                trainers.add(trainer);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return trainers;
     }
 }
