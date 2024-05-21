@@ -62,4 +62,27 @@ public class CRUDUtils {
 
         return trainers;
     }
+    public static boolean authenticateVisitor(String firstName, String lastName) {
+        return authenticateUser(firstName, lastName, "gymmembers");
+    }
+
+    public static boolean authenticateTrainer(String firstName, String lastName) {
+        return authenticateUser(firstName, lastName, "trainers");
+    }
+
+
+    private static boolean authenticateUser(String firstName, String lastName, String table) {
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM " + table + " WHERE first_name = ? AND last_name = ?")) {
+            stmt.setString(1, firstName);
+            stmt.setString(2, lastName);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }
