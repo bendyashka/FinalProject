@@ -1,5 +1,6 @@
 package org.example;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -15,7 +16,7 @@ public class GymApp {
                     "1 - Visitor " +
                     "2 - Trainer " +
                     "3 - Admin " +
-                    "4 - Exit ");
+                    "9 - Exit ");
             int login = scanner.nextInt();
             scanner.nextLine();
 
@@ -25,7 +26,7 @@ public class GymApp {
                 authenticateTrainer(scanner);
             } else if (login == 3) {
                 authenticateAdmin(scanner);
-            } else if (login == 4) {
+            } else if (login == 9) {
                 break;
             } else {
                 System.out.println("Error, please choose a valid option.");
@@ -57,11 +58,34 @@ public class GymApp {
 
         if (CRUDUtils.authenticateTrainer(loginTrainer, passwordTrainer)) {
             System.out.println("Authentication Successful");
-
+            showTrainerMenu(scanner);
         } else {
             System.out.println("Authentication Failed");
         }
     }
+
+    private static void showTrainerMenu(Scanner scanner) {
+        while (true) {
+            System.out.println("Trainer Menu:");
+            System.out.println("1 - Update Room Status");
+            System.out.println("2 - Back to Main Menu");
+            System.out.print("Enter your choice: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1:
+                    updateRoomStatus(scanner);
+                    break;
+                case 2:
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+
 
 
     private static void authenticateAdmin(Scanner scanner) {
@@ -87,8 +111,9 @@ public class GymApp {
             System.out.println("2 - Add Trainer");
             System.out.println("3 - Show List Visitors");
             System.out.println("4 - Show List Trainers");
-            System.out.println("5 - Change Admin Password");
-            System.out.println("6 - Exit");
+            System.out.println("5 - Add Room");
+            System.out.println("6 - Change Admin Password");
+            System.out.println("7 - Exit");
 
             int choice;
             if (scanner.hasNextInt()) {
@@ -104,8 +129,10 @@ public class GymApp {
                 } else if (choice == 4) {
                     showListTrainer();
                 } else if (choice == 5) {
-                    changeAdminPassword(scanner);
+                    addRoom(scanner);
                 } else if (choice == 6) {
+                    changeAdminPassword(scanner);
+                } else if (choice == 7) {
                     System.out.println("Exiting program...");
                     break;
                 } else {
@@ -117,6 +144,7 @@ public class GymApp {
             }
         }
     }
+
 
     private static void changeAdminPassword(Scanner scanner) {
         System.out.print("Enter new admin password: ");
@@ -186,4 +214,45 @@ public class GymApp {
             System.out.println(visitor);
         }
     }
+    private static void addRoom(Scanner scanner) {
+        System.out.println("Enter Room ID: ");
+        int roomID = Integer.parseInt(scanner.nextLine());
+
+        System.out.println("Enter Trainer ID for the room: ");
+        int trainerID = Integer.parseInt(scanner.nextLine());
+
+        CRUDUtils.addRoom(roomID, trainerID);
+    }
+    private static void updateRoomStatus(Scanner scanner) {
+        System.out.println("Enter RoomID: ");
+        int roomId = scanner.nextInt();
+        scanner.nextLine();
+
+        System.out.println("Enter Date (YYYY-MM-DD): ");
+        String date = scanner.nextLine();
+
+        System.out.println("Enter your available hours (type 'Finish' when done): ");
+        List<String> availableHours = new ArrayList<>();
+        String input;
+        while (!(input = scanner.nextLine()).equalsIgnoreCase("Finish")) {
+            availableHours.add(input);
+        }
+
+
+        String[] allHours = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
+        String[] hours = availableHours.toArray(new String[0]);
+        String[] statuses = new String[12];
+        Arrays.fill(statuses, "CLOSED");
+
+
+        for (String hour : hours) {
+            statuses[Integer.parseInt(hour) - 1] = "OPEN";
+        }
+
+
+        CRUDUtils.updateRoomStatus(roomId, date, allHours, statuses);
+
+        System.out.println("Room status updated successfully.");
+    }
+
 }

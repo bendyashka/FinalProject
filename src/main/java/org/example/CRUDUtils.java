@@ -117,5 +117,39 @@ public class CRUDUtils {
             e.printStackTrace();
         }
     }
+    public static void addRoom(int roomID, int trainerID) {
+        String INSERT_ROOM = "INSERT INTO roomschedule (RoomID, TrainerID) VALUES (?, ?)";
+        try (Connection connection = DBUtils.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_ROOM)) {
+            preparedStatement.setInt(1, roomID);
+            preparedStatement.setInt(2, trainerID);
+            preparedStatement.executeUpdate();
+            System.out.println("Room successfully added." +
+                    "       ");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+    public static void updateRoomStatus(int roomId, String date, String[] hours, String[] statuses) {
+        String UPDATE_ROOM_STATUS = "UPDATE roomschedule SET Hour_1_Status = ?, Hour_2_Status = ?, Hour_3_Status = ?, Hour_4_Status = ?, Hour_5_Status = ?, Hour_6_Status = ?, Hour_7_Status = ?, Hour_8_Status = ?, Hour_9_Status = ?, Hour_10_Status = ?, Hour_11_Status = ?, Hour_12_Status = ? WHERE RoomID = ? AND Date = ?";
+        try (Connection connection = DBUtils.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_ROOM_STATUS)) {
+
+            for (int i = 0; i < hours.length; i++) {
+                preparedStatement.setString(i + 1, statuses[i]);
+            }
+
+            preparedStatement.setInt(hours.length + 1, roomId);
+            preparedStatement.setString(hours.length + 2, date);
+
+            preparedStatement.executeUpdate();
+            System.out.println("Room status updated successfully.");
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+
+
 
 }
