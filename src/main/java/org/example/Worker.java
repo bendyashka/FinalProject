@@ -7,14 +7,24 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Visitor extends User {
+public class Worker extends User {
+    private int sectionNumber;
     private String login;
     private String password;
 
-    public Visitor(int id, String name, String lastName, String login, String password) {
-        super(id, name, lastName);
+    public Worker(int id, String name, String lastname, int sectionNumber, String login, String password) {
+        super(id, name, lastname);
+        this.sectionNumber = sectionNumber;
         this.login = login;
         this.password = password;
+    }
+
+    public int getSectionNumber() {
+        return sectionNumber;
+    }
+
+    public void setSectionNumber(int sectionNumber) {
+        this.sectionNumber = sectionNumber;
     }
 
     public String getLogin() {
@@ -35,56 +45,39 @@ public class Visitor extends User {
 
     @Override
     public String toString() {
-        return "Visitor: {" +
+        return "Worker: {" +
                 "id=" + getId() +
                 ", name='" + getName() + '\'' +
                 ", lastname='" + getLastname() + '\'' +
+                ", sectionNumber=" + sectionNumber +
                 ", login='" + login + '\'' +
-                ", password='" + password + '\'' +
                 '}';
     }
 
-
-    public static List<Visitor> getVisitorList() {
-        List<Visitor> visitors = new ArrayList<>();
-        String query = "SELECT * FROM visitors";
+    public static List<Worker> getWorkerList() {
+        List<Worker> workers = new ArrayList<>();
+        String query = "SELECT * FROM workers";
 
         try (Connection connection = DBUtils.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(query);
              ResultSet resultSet = preparedStatement.executeQuery()) {
 
             while (resultSet.next()) {
-                int id = resultSet.getInt("id");
+                int id = resultSet.getInt("worker_id");
                 String name = resultSet.getString("name");
                 String lastName = resultSet.getString("last_name");
+                int sectionNumber = resultSet.getInt("section_number");
                 String login = resultSet.getString("login");
                 String password = resultSet.getString("password");
 
-                Visitor visitor = new Visitor(id, name, lastName, login, password);
-                visitors.add(visitor);
+                Worker worker = new Worker(id, name, lastName, sectionNumber, login, password);
+                workers.add(worker);
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return visitors;
-    }
-
-
-    public static boolean authenticateVisitor(String login, String password) {
-        List<Visitor> visitors = getVisitorList();
-
-
-        for (Visitor visitor : visitors) {
-            if (visitor.getLogin().equals(login) && visitor.getPassword().equals(password)) {
-                return true;
-            }
-        }
-
-
-        return false;
+        return workers;
     }
 }
-
-

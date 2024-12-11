@@ -1,18 +1,17 @@
+
 package org.example;
+
 import java.util.Scanner;
-import java.util.InputMismatchException;
 
 public class User {
     private int id;
     private String name;
     private String lastname;
 
-
     public User(int id, String name, String lastname) {
         this.id = id;
         this.name = name;
         this.lastname = lastname;
-
     }
 
     public int getId() {
@@ -38,6 +37,5 @@ public class User {
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
-
-
 }
+

@@ -1,98 +1,97 @@
 package org.example;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class CRUDUtils {
-    public static void saveVisitorData(String name, String lastname, String subscriptionExpiryDate, boolean isSubscriptionActive, int groupNumber, String loginMember, String passwordMember) {
-        String INSERT_USER = "INSERT INTO gymmembers (name, last_name, subscription_expiry_date, is_subscription_active, group_number, login_member, password_member) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+
+    public static void saveBook(String title, double price, boolean isAvailable, String availableDate) {
+        String INSERT_BOOK = "INSERT INTO books (title, price, is_available, available_date) VALUES (?, ?, ?, ?)";
         try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER)) {
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, lastname);
-            preparedStatement.setString(3, subscriptionExpiryDate);
-            preparedStatement.setBoolean(4, isSubscriptionActive);
-            preparedStatement.setInt(5, groupNumber);
-            preparedStatement.setString(6, loginMember);
-            preparedStatement.setString(7, passwordMember);
+             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_BOOK)) {
+            preparedStatement.setString(1, title);
+            preparedStatement.setDouble(2, price);
+            preparedStatement.setBoolean(3, isAvailable);
+            preparedStatement.setString(4, availableDate);
             preparedStatement.executeUpdate();
-            System.out.println("Данные успешно добавлены в базу данных.");
+            System.out.println("Книга успешно добавлена в базу данных.");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    public static boolean authenticateVisitor(String loginMember, String passwordMember) {
-        return authenticateUser(loginMember, passwordMember, "gymmembers", "login_member", "password_member");
-    }
+    public static boolean authenticateWorker(String login, String password) {
 
-    public static boolean authenticateTrainer(String loginTrainer, String passwordTrainer) {
-        return authenticateUser(loginTrainer, passwordTrainer, "trainers", "login_trainer", "password_trainer");
-    }
+        String query = "SELECT * FROM workers WHERE login = ? AND password = ?";
+
+        try (Connection connection = DBUtils.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
 
 
-    private static boolean authenticateUser(String login, String password, String table, String loginColumn, String passwordColumn) {
-        String query = "SELECT * FROM " + table + " WHERE " + loginColumn + " = ? AND " + passwordColumn + " = ?";
-        try (Connection conn = DBUtils.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setString(1, login);
-            stmt.setString(2, password);
-            try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next();
+            preparedStatement.setString(1, login);
+            preparedStatement.setString(2, password);
+
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+
+            if (resultSet.next()) {
+                return true;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return false;
     }
 
 
-    public static void saveTrainerData(String name, String lastname, int groupNumber, String loginTrainer, String passwordTrainer) {
-        String INSERT_USER = "INSERT INTO trainers (name, last_name, group_number, login_trainer, password_trainer) VALUES (?, ?, ?, ?, ?)";
+    public static void saveVisitor(String name, String lastName, String login, String password, String membershipExpiryDate, boolean membershipActive) {
+        String query = "INSERT INTO visitors (name, last_name, login, password, membership_expiry_date, membership_active) VALUES (?, ?, ?, ?, ?, ?)";
+
         try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_USER)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+
+
+            preparedStatement.setString(1, name);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setString(3, login);
+            preparedStatement.setString(4, password);
+            preparedStatement.setString(5, membershipExpiryDate);
+            preparedStatement.setBoolean(6, membershipActive);
+
+
+            preparedStatement.executeUpdate();
+            System.out.println("Visitor has been added successfully to the database.");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Failed to save the visitor.");
+        }
+    }
+
+
+    public static void saveWorker(String name, String lastname, String login, String password) {
+        String INSERT_WORKER = "INSERT INTO workers (name, last_name, login, password) VALUES (?, ?, ?, ?)";
+        try (Connection connection = DBUtils.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_WORKER)) {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, lastname);
-            preparedStatement.setInt(3, groupNumber);
-            preparedStatement.setString(4, loginTrainer);
-            preparedStatement.setString(5, passwordTrainer);
+            preparedStatement.setString(3, login);
+            preparedStatement.setString(4, password);
             preparedStatement.executeUpdate();
-            System.out.println("Данные успешно добавлены в базу данных.");
+            System.out.println("Сотрудник успешно добавлен в базу данных.");
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
-    public static List<Trainer> getTrainerList() {
-        List<Trainer> trainers = new ArrayList<>();
-        String query = "SELECT member_id, name, last_name, group_number FROM trainers"; // Изменил на 'trainers'
 
-        try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(query);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
 
-            while (resultSet.next()) {
-                int id = resultSet.getInt("member_id");
-                String name = resultSet.getString("name");
-                String lastname = resultSet.getString("last_name");
-                int groupNumber = resultSet.getInt("group_number");
-
-                Trainer trainer = new Trainer(id, name, lastname, groupNumber);
-                trainers.add(trainer);
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return trainers;
-    }
     public static boolean authenticateAdmin(String username, String password) {
-        String query = "SELECT * FROM password_admin WHERE username = ? AND password = ?";
+        String query = "SELECT * FROM admin WHERE username = ? AND password = ?";
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, username);
@@ -106,50 +105,119 @@ public class CRUDUtils {
         return false;
     }
 
-    public static void updateAdminPassword(String newPassword) {
-        String updateQuery = "UPDATE password_admin SET password = ? WHERE username = 'admin'";
+    public static void updateAdminPassword(String username, String newPassword) {
+        String updateQuery = "UPDATE admin SET password = ? WHERE username = ?";
         try (Connection conn = DBUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
             stmt.setString(1, newPassword);
+            stmt.setString(2, username);
             stmt.executeUpdate();
-            System.out.println("Admin password updated successfully.");
+            System.out.println("Пароль администратора успешно обновлён.");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    public static void addRoom(int roomID, int trainerID) {
-        String INSERT_ROOM = "INSERT INTO roomschedule (RoomID, TrainerID) VALUES (?, ?)";
-        try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_ROOM)) {
-            preparedStatement.setInt(1, roomID);
-            preparedStatement.setInt(2, trainerID);
-            preparedStatement.executeUpdate();
-            System.out.println("Room successfully added." +
-                    "       ");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-    }
-    public static void updateRoomStatus(int roomId, String date, String[] hours, String[] statuses) {
-        String UPDATE_ROOM_STATUS = "UPDATE roomschedule SET Hour_1_Status = ?, Hour_2_Status = ?, Hour_3_Status = ?, Hour_4_Status = ?, Hour_5_Status = ?, Hour_6_Status = ?, Hour_7_Status = ?, Hour_8_Status = ?, Hour_9_Status = ?, Hour_10_Status = ?, Hour_11_Status = ?, Hour_12_Status = ? WHERE RoomID = ? AND Date = ?";
-        try (Connection connection = DBUtils.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_ROOM_STATUS)) {
 
-            for (int i = 0; i < hours.length; i++) {
-                preparedStatement.setString(i + 1, statuses[i]);
+
+    public static List<Book> getBookList() {
+        List<Book> books = new ArrayList<>();
+        String query = "SELECT * FROM books";
+
+        try (Connection connection = DBUtils.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query);
+             ResultSet resultSet = preparedStatement.executeQuery()) {
+
+            while (resultSet.next()) {
+                int id = resultSet.getInt("id");
+                String title = resultSet.getString("title");
+                double price = resultSet.getDouble("price");
+                boolean isAvailable = resultSet.getBoolean("is_available");
+                String availableDate = resultSet.getString("available_date");
+
+                Book book = new Book(id, title, price, isAvailable, availableDate);
+                books.add(book);
             }
 
-            preparedStatement.setInt(hours.length + 1, roomId);
-            preparedStatement.setString(hours.length + 2, date);
-
-            preparedStatement.executeUpdate();
-            System.out.println("Room status updated successfully.");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
+
+        return books;
+    }
+
+
+    public static void updateBookAvailability(int bookId, boolean isAvailable, java.sql.Date availableDate) {
+        String query = "UPDATE books SET is_available = ?, available_date = ? WHERE id = ?";
+
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setBoolean(1, isAvailable);
+            if (isAvailable) {
+                stmt.setNull(2, java.sql.Types.DATE);
+            } else {
+                stmt.setDate(2, availableDate);
+            }
+            stmt.setInt(3, bookId);
+
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Book availability updated successfully.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean authenticateVisitor(String login, String password) {
+        String query = "SELECT * FROM visitors WHERE login = ? AND password = ?";
+
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, login);
+            stmt.setString(2, password);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
 
 
-
+    public static boolean borrowBook(int bookId) {
+        String updateQuery = "UPDATE visitors SET borrowed_book_id = ? WHERE borrowed_book_id IS NULL LIMIT 1";
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+            stmt.setInt(1, bookId);
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                updateBookAvailability(bookId, false, Date.valueOf("NULL"));
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public static boolean returnBook(int bookId) {
+        String updateQuery = "UPDATE visitors SET borrowed_book_id = NULL WHERE borrowed_book_id = ?";
+        try (Connection conn = DBUtils.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+            stmt.setInt(1, bookId);
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                updateBookAvailability(bookId, true, Date.valueOf("CURRENT_DATE")); // Предполагается, что возврат делает книгу доступной
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
